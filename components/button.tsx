@@ -1,11 +1,13 @@
 import { styled } from "@linaria/react";
 import { FunctionComponent, ReactNode } from "react";
 
-interface ButtonProps {
+export interface ButtonProps {
     variant?: "primary" | "standard"
     children: ReactNode
+    className?: string;
 }
 
+// Example with styled helper
 const StyledButton = styled.button<ButtonProps>`
     font-family: sans-serif;
     display: flex;
@@ -28,6 +30,6 @@ const StyledButton = styled.button<ButtonProps>`
   border-color: rgba(0, 0, 0, 0.2);
 `;
 
-export const Button: FunctionComponent<ButtonProps> = ({ variant = "standard", children }) => {
-    return <StyledButton variant={variant}>{children}</StyledButton>
+export const Button: FunctionComponent<ButtonProps> = ({ variant = "standard", children, className }) => {
+    return <StyledButton className={className} variant={variant}>{children}</StyledButton>
 }
