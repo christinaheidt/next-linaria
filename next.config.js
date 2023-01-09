@@ -1,43 +1,55 @@
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const LINARIA_EXTENSION = ".linaria.module.css";
+
+// shamelessly copied from https://github.com/Mistereo/next-linaria/blob/master/index.js
+function traverse(rules) {
+  for (let rule of rules) {
+    if (typeof rule.loader === 'string' && rule.loader.includes('css-loader')) {
+      if (
+        rule.options &&
+        rule.options.modules &&
+        typeof rule.options.modules.getLocalIdent === 'function'
+      ) {
+        let nextGetLocalIdent = rule.options.modules.getLocalIdent;
+        rule.options.modules.mode = 'local';
+        rule.options.modules.auto = true;
+        rule.options.modules.exportGlobals = true;
+        rule.options.modules.exportOnlyLocals = false;
+        rule.options.modules.getLocalIdent = (context, _, exportName, options) => {
+          if (context.resourcePath.includes(LINARIA_EXTENSION)) {
+            return exportName;
+          }
+          return nextGetLocalIdent(context, _, exportName, options);
+        };
+      }
+    }
+    if (typeof rule.use === 'object') {
+      traverse(Array.isArray(rule.use) ? rule.use : [rule.use]);
+    }
+    if (Array.isArray(rule.oneOf)) {
+      traverse(rule.oneOf);
+    }
+  }
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
 
   webpack: (config, options) => {
+    traverse(config.module.rules);
     config.module.rules.push({
-      test: /\.(ts|tsx)/,
+      test: /\.(tsx|ts|js|mjs|jsx)$/,
       use: [
-        options.defaultLoaders.babel,
+        { loader: 'babel-loader' },
         {
-          loader: "@linaria/webpack-loader",
+          loader: '@linaria/webpack-loader',
           options: {
-            sourceMap: process.env.NODE_ENV !== "production",
+            sourceMap: process.env.NODE_ENV !== 'production',
+            extension: LINARIA_EXTENSION,
           },
-        },
+        }
       ],
     });
-
-    config.module.rules.push({
-      test: /\.css$/,
-      use: [
-        {
-          loader: MiniCssExtractPlugin.loader,
-        },
-        {
-          loader: "css-loader",
-          options: {
-            sourceMap: process.env.NODE_ENV !== "production",
-          },
-        },
-      ],
-    });
-
-    config.plugins.push(
-      new MiniCssExtractPlugin({
-        filename: "linaria.css",
-      })
-    );
 
     return config;
   },
