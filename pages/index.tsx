@@ -1,13 +1,16 @@
 import { styled } from '@linaria/react'
 import Head from 'next/head'
 import { Button, ButtonProps } from '../components/button'
+import { Link } from '../components/link'
 
 const Title = styled.h1`
   font-weight: bold;
   font-family: sans-serif;
+  margin-bottom: 4px;
 `
 
 const FlexContainer = styled.div`
+padding-top: 40px;
   display: flex;
   gap: 12px;
 `
@@ -25,6 +28,7 @@ export default function Home() {
       </Head>
       <main>
         <Title>Linaria Sample</Title>
+        <Link href="/">Home</Link>
         <FlexContainer>
           <Button variant='primary'>Primary</Button>
           <Button variant='primary'>Primary</Button>
